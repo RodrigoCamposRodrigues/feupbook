@@ -9,6 +9,57 @@ At the heart of our project vision for Feupbook is the unwavering commitment to 
 - [EAP: Architecture Specification and Prototype](./Wiki/eap.md)
 - [PA: Product and Presentation](./Wiki/pa.md)
 
+## Installing the software dependencies
+
+To prepare you computer for development you need to install PHP >=v8.1 and Composer >=v2.2.
+
+We recommend using an __Ubuntu__ distribution that ships with these versions (e.g Ubuntu 22.04 or newer). You may install the required software with:
+
+```bash
+sudo apt update
+sudo apt install git composer php8.1 php8.1-mbstring php8.1-xml php8.1-pgsql php8.1-curl
+```
+
+On MacOS, you can install them using [Homebrew](https://brew.sh/) and:
+```bash
+brew install php@8.1 composer
+```
+
+If you use [Windows WSL](https://learn.microsoft.com/en-us/windows/wsl/install), please ensure you are also using Ubuntu 22.04 inside. Previous versions do not provide the requirements needed for this template, and then follow the Ubuntu instructions above.
+
+## Setting up the database
+
+We've created a _docker compose_ file that sets up __PostgreSQL__ and __pgAdmin4__ to run as local Docker containers.
+
+From the project root issue the following command:
+
+```bash
+docker compose up -d
+```
+
+This will start your containers in detached mode. To stop them use:
+
+```bash
+docker compose down
+```
+
+### Run
+
+To start the development server from the project's root run:
+
+```bash
+# Seed database from the SQL file.
+# Needed on first run and every time the database script changes.
+php artisan db:seed
+
+# Start the development server
+php artisan serve
+```
+
+Access `http://localhost:8000` to access the app.
+
+To stop the server just hit Ctrl-C.
+
 ## Usage
 
 #### Administration Credentials
