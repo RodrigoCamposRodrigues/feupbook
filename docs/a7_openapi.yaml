@@ -1,0 +1,845 @@
+openapi: 3.0.0
+
+info:
+ version: '1.0'
+ title: 'Feupbook Web API'
+ description: 'Web Resources Specification (A7) for Feupbook'
+
+servers:
+- url: https://lbaw23141.lbaw.fe.up.pt
+  description: Production server
+
+externalDocs:
+ description: Find more info here.
+ url: https://git.fe.up.pt/lbaw/lbaw2324/lbaw23141/-/wikis/eap
+
+tags:
+ - name: 'M01: Authentication'
+ - name: 'M02: Users'
+ - name: 'M03: Posts'
+ - name: 'M04: Search'
+ - name: 'M05: Administration'
+ - name: 'M06: Comments'
+
+paths:
+
+######### WELCOME #########
+
+  /:
+
+    get:
+      operationId: R000
+      summary: 'R000: Welcome page'
+      description: 'Shows the welcome page. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      responses:
+        '200':
+          description: 'Ok. Show welcome UI.'
+
+############################################ AUTENTICATION ############################################
+
+######### LOGIN #########
+
+  /login:
+
+    get:
+      operationId: R101
+      summary: 'R101: Login Form'
+      description: 'Provide login form. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      responses:
+        '200':
+          description: 'OK. Show log-in UI'
+
+    post:
+      operationId: R102
+      summary: 'R102: Login Action'
+      description: 'Processes the login form submission. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urllencoded:
+            schema:
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                  - email
+                  - password
+
+      responses:
+        '302':
+          description: 'Redirect after processing the login credentials.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                homeRedirect:
+                  description: 'Successful authentication. Redirect to home page.'
+                  value: '/home'
+                loginRedirect:
+                  description: 'Failed authentication. Redirect to login form.'
+                  value: '/login'
+
+######### LOGOUT #########
+
+  /logout:
+
+    get:
+      operationId: R103
+      summary: 'R103 : Logout Action'
+      description: 'Logout the current authenticated user. Access: USR, ADM'
+      tags:
+        - 'M01: Authentication'
+
+      responses:
+        '302':
+          description: 'Redirect after processing logout.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Successful logout. Redirect to login form.'
+                  value: '/login'
+
+######### REGISTER #########
+
+  /register:
+
+    get:
+      operationId: R104
+      summary: 'R104 : Register Form'
+      description: 'Provide new user registration form. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      responses:
+        '200':
+          description: 'Ok. Show Sign-Up UI.'
+
+    post:
+      operationId: R105
+      summary: 'R105 : Register Action'
+      description: 'Processes the new user registration form submission. Access: VST'
+      tags:
+        - 'M01: Authentication'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                confirm_password:
+                  type: string
+                  format: password
+              required:
+                - username
+                - name
+                - email
+                - password
+                - confirm_password;
+
+      responses:
+        '302':
+          description: 'Redirect after processing the new user information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                  homeRedirect:
+                    description: 'Successful registration. Redirect to home page.'
+                    value: '/home'
+                  registerRedirect:
+                    description: 'Failed registration. Redirect to register form.'
+                    value: '/register'
+
+############################################ USERS ############################################
+
+######### HOME PAGE #########
+
+  /home:
+
+    get:
+      operationId: R201
+      summary: 'R201: View user home page'
+      description: 'Show user home page, Access: USR, ADM'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the home page for an individual user'
+        '401':
+          description: 'Unauthorized. The client must authenticate itself to get the requested response.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                  loginRedirect:
+                    description: 'Redirect to the login page due to unauthorized access.'
+                    value: '/login'
+                  
+######### FOR YOU HOME PAGE #########
+  
+  /home/forYou:
+
+    get:
+      operationId: R202
+      summary: 'R202: View for you home page'
+      description: 'Show for you home page, Access: USR, ADM'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the for you home page for an individual user'
+        '401':
+          description: 'Unauthorized. The client must authenticate itself to get the requested response.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                  loginRedirect:
+                    description: 'Redirect to the login page due to unauthorized access.'
+                    value: '/login'
+
+######### PROFILE #########
+
+  /user/{id}:
+
+    get:
+      operationId: R203
+      summary: 'R203: View user profile'
+      description: 'Show the individual user profile, Access: USR, OWN, ADM'
+      tags:
+        - 'M02: Users'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'OK. Show User profile UI.'
+        '302':
+          description: 'Redirect if user is not logged in.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Redirect to the login page due to unauthorized access.'
+                  value: '/login'
+        '404':
+          description: 'Not Found. The user does not exist.'
+          
+######### FOLLOW #########
+
+  /user/{id}/follow:
+
+    post:
+      operationId: R204
+      summary: 'R204: Follow a user.'
+      description: 'Follows a user. Access: USR, ADM'
+      tags:
+        - 'M02: Users'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. You followed a user.'
+        '403':
+          description: 'Forbidden action.'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                userNotFound:
+                  value:
+                    error_code: "UserNotFound"
+                    message: "The user ID does not exist."
+                alreadyAFollower:
+                  value:
+                    error_code: "AlreadyAFollower"
+                    message: "The specified ID is already a follower of the user."
+
+######### UNFOLLOW #########
+
+  /user/{id}/unfollow:
+
+    post:
+      operationId: R205
+      summary: 'R205: Unfollow a user.'
+      description: 'Unfollows a user. Access: USR, ADM'
+      tags:
+        - 'M02: Users'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. You unfollowed a user.'
+        '403':
+          description: 'Forbidden action.'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                userNotFound:
+                  value:
+                    error_code: "UserNotFound"
+                    message: "The user ID does not exist."
+                notAFollower:
+                  value:
+                    error_code: "NotAFollower"
+                    message: "The specified ID is not a follower of the user."
+
+######### ABOUT PAGE #########
+
+  /about:
+
+    get:
+      operationId: R206
+      summary: 'R206: About static page'
+      description: 'Shows About Page. Access USR, ADM, VST'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the about page.'
+
+######### HELP PAGE #########
+
+  /help:
+
+    get:
+      operationId: R207
+      summary: 'R207: Help static page'
+      description: 'Shows Help Page. Access USR, ADM, VST'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the help page.'
+
+######### FAQ PAGE #########
+
+  /faq:
+
+    get:
+      operationId: R208
+      summary: 'R208: FAQ static page'
+      description: 'Shows FAQ Page. Access USR, ADM, VST'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the FAQ page.'
+
+######### CONTACTS PAGE #########
+
+  /contacts:
+
+    get:
+      operationId: R209
+      summary: 'R209: Contacts static page'
+      description: 'Shows Contacts Page. Access USR, ADM, VST'
+      tags:
+        - 'M02: Users'
+
+      responses:
+        '200':
+          description: 'OK. Show the contacts page.'
+
+############################################ POSTS ############################################
+
+######### CREATE POST #########
+
+  /post/create:
+
+    get:
+      operationId: R301
+      summary: 'R301: Create post page'
+      description: 'Shows the create post page. Access: USR'
+      tags:
+        - 'M03: Posts'
+
+      responses:
+        '200':
+          description: 'Ok. Show create post UI.'
+
+    post:
+      operationId: R302
+      summary: 'R302: Create post action'
+      description: 'Creates a post. Access: USR'
+      tags:
+        - 'M03: Posts'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+                - content
+
+      responses:
+        '302':
+          description: 'Redirect once the new post information is processed.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Post created successfully. Redirect back.'
+                302Failure:
+                  description: 'Failed. Redirect back.'
+
+######### POST PAGE #########
+
+  /post/{id}:
+
+    get:
+      operationId: R303
+      summary: 'R303: View post page'
+      description: 'Shows the post page. Access: OWN, USR, ADM'
+      tags:
+        - 'M03: Posts'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. Show post UI.'
+        '404':
+          description: 'Not Found. The post does not exist.'
+
+######### EDIT POST #########
+
+  /post/{id}/edit: 
+
+    get:
+      operationId: R304
+      summary: 'R304: Edit post page'
+      description: 'Shows the edit post page. Access: OWN, ADM'
+      tags:
+        - 'M03: Posts'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. Show edit post UI.'
+        '403':
+          description: 'Forbidden action.'
+        '404':
+          description: 'Not Found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                postNotFound:
+                  value:
+                    error_code: "PostNotFound"
+                    message: "The post ID does not exist."
+                postNotFromUser:
+                  value:
+                    error_code: "PostNotFromUser"
+                    message: "The post does not belong to the user."
+
+    post:
+      operationId: R305
+      summary: 'R305: Edit post action'
+      description: 'Processes and saves the changes made by user. Access: OWN, ADM'
+      tags:
+        - 'M03: Posts'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+                - content
+
+      responses:
+        '302':
+          description: 'Redirect once the new post information is processed.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Post edited successfully. Redirect back.'
+                302Failure:
+                  description: 'Failed. Redirect back.'
+
+######### DELETE POST #########
+
+  /post/{id}/delete:
+
+    post:
+      operationId: R306
+      summary: 'R306: Delete post action'
+      description: 'Deletes a post. Access: OWN, ADM'
+      tags:
+        - 'M03: Posts'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '302':
+          description: 'Redirect once the post is deleted.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Post deleted successfully. Redirect back.'
+                302Failure:
+                  description: 'Failed. Redirect back.'
+
+############################################ SEARCH ############################################
+
+######### SEARCH #########
+
+  /search:
+
+    get:
+      operationId: R401
+      summary: 'R401: Search page'
+      description: 'Shows the search page. Access: USR, ADM'
+      tags:
+        - 'M04: Search'
+
+      responses:
+        '200':
+          description: 'Ok. Show search UI.'
+        '302':
+          description: 'Redirect if user is not logged in.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Redirect to the login page due to unauthorized access.'
+                  value: '/login'
+                
+
+######### SEARCH FOR USER#########
+
+  /api/user:
+
+    get:
+      operationId: R402
+      summary: 'R402: Search for user'
+      description: 'Shows the search results for users. Access: USR, ADM'
+      tags:
+        - 'M04: Search'
+
+      parameters:
+        - in: query
+          name: query
+          description: 'The search query.'
+          schema:
+            type: string
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. Show search results for users.'
+        '302':
+          description: 'Redirect if user is not logged in.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Redirect to the login page due to unauthorized access.'
+                  value: '/login'
+    
+
+############################################ ADMINISTRATION ############################################
+
+######### ADMIN USER EDIT PAGE #########
+
+  /admin/user/{id}/edit:
+
+    get:
+      operationId: R501
+      summary: 'R501: Admin edit user page'
+      description: 'Shows the admin edit user page. Access: ADM'
+      tags:
+        - 'M05: Administration'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '200':
+          description: 'Ok. Show admin edit user UI.'
+        '302':
+          description: 'Redirect if user is not logged in.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Redirect to the login page due to unauthorized access.'
+                  value: '/login'
+        '403':
+          description: 'Forbidden. The user is not an administrator.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                loginRedirect:
+                  description: 'Redirect to the home page due to unauthorized access.'
+                  value: '/home'
+        '404':
+          description: 'Not Found. The user does not exist.'
+
+    post:
+      operationId: R502
+      summary: 'R502: Admin edit user action'
+      description: 'Processes and saves the changes made by admin. Access: ADM'
+      tags:
+        - 'M05: Administration'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                  username:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  password:
+                    type: string
+                    format: password
+                  confirm_password:
+                    type: string
+                    format: password
+                  role:
+                    type: string
+                    enum: [USR, ADM]
+                  bio:
+                    type: string
+              required:
+                - username
+                - name
+                - email
+                - password
+                - confirm_password
+                - role
+                - bio
+
+      responses:
+        '302':
+          description: 'Redirect once the new user information is processed.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'User edited successfully. Redirect to the user profile page.'
+                  headers:
+                    Location:
+                      schema:
+                        type: string
+                      example: '/user/{id}'
+                302Failure:
+                  description: 'Failed. Redirect back.'
+
+############################################ COMMENTS ##############################################
+
+######### CREATE COMMENT #########
+
+  /comment/create:
+
+    post:
+      operationId: R601
+      summary: 'R601: Create comment action'
+      description: 'Creates a comment. Access: USR, ADM'
+      tags:
+        - 'M06: Comments'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+                - content
+
+      responses:
+        '302':
+          description: 'Redirect once the new comment information is processed.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Comment created successfully. Redirect back.'
+                302Failure:
+                  description: 'Failed. Redirect back.'
+
+######### DELETE COMMENT #########
+
+  /comment/{id}/delete:
+
+    post:
+      operationId: R602
+      summary: 'R602: Delete comment action'
+      description: 'Deletes a comment. Access: OWN, ADM'
+      tags:
+        - 'M06: Comments'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: True
+
+      responses:
+        '302':
+          description: 'Redirect once the comment is deleted.'
+          headers:
+            Location:
+              schema:
+                type: string
+              example:
+                302Success:
+                  description: 'Comment deleted successfully. Redirect back.'
+                302Failure:
+                  description: 'Failed. Redirect back.'
